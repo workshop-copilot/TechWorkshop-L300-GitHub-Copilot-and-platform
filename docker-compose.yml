@@ -1,0 +1,75 @@
+# Docker Compose for ZavaStorefront Development Environment
+# Provides local development environment with hot reload and debugging support
+
+version: '3.8'
+
+services:
+  # Web Application Service
+  zavastorefrontapp:
+    build:
+      context: ./src
+      dockerfile: Dockerfile
+      target: build  # Use build stage for development
+    container_name: zavastorefrontapp-dev
+    ports:
+      - "5000:80"      # HTTP
+      - "5001:443"     # HTTPS
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:80;https://+:443
+      - ASPNETCORE_HTTPS_PORT=5001
+      - ASPNETCORE_HTTP_PORT=5000
+      - ApplicationInsights__InstrumentationKey=
+      - ApplicationInsights__ConnectionString=
+    volumes:
+      - ./src:/src:rw
+      - ./src/bin:/app/bin:rw
+      - ./src/obj:/app/obj:rw
+      - ~/.aspnet/https:/root/.aspnet/https:ro
+      - ~/.microsoft/usersecrets:/root/.microsoft/usersecrets:ro
+    networks:
+      - zavastorefrontapp-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # SQL Server for future database needs (commented out for now since app uses in-memory data)
+  # sqlserver:
+  #   image: mcr.microsoft.com/mssql/server:2022-latest
+  #   container_name: zavastorefrontapp-sqlserver
+  #   ports:
+  #     - "1433:1433"
+  #   environment:
+  #     - ACCEPT_EULA=Y
+  #     - SA_PASSWORD=Dev123!@#
+  #     - MSSQL_PID=Express
+  #   volumes:
+  #     - sqlserver_data:/var/opt/mssql
+  #   networks:
+  #     - zavastorefrontapp-network
+  #   restart: unless-stopped
+
+  # Redis for future session storage (commented out for now since app uses in-memory sessions)
+  # redis:
+  #   image: redis:7-alpine
+  #   container_name: zavastorefrontapp-redis
+  #   ports:
+  #     - "6379:6379"
+  #   command: redis-server --appendonly yes --requirepass "Dev123!@#"
+  #   volumes:
+  #     - redis_data:/data
+  #   networks:
+  #     - zavastorefrontapp-network
+  #   restart: unless-stopped
+
+networks:
+  zavastorefrontapp-network:
+    driver: bridge
+
+# volumes:
+#   sqlserver_data:
+#   redis_data:
