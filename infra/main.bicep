@@ -66,7 +66,7 @@ module foundry './modules/foundry.bicep' = {
     location: location
     tags: tags
     openAIAccountName: '${abbrs.openAIAccount}${applicationName}-${environmentName}'
-    principalId: appService.outputs.managedIdentityPrincipalId
+    principalId: appService.outputs.systemAssignedPrincipalId
     logAnalyticsWorkspaceId: monitoring.outputs.logAnalyticsWorkspaceId
   }
 }

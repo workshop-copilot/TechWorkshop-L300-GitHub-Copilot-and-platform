@@ -103,12 +103,12 @@ resource phi3Deployment 'Microsoft.CognitiveServices/accounts/deployments@2024-1
   ]
 }
 
-// Assign Cognitive Services OpenAI User role to the principal
+// Assign Cognitive Services User role to the principal
 resource openAIRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = if (!empty(principalId)) {
   scope: openAIAccount
-  name: guid(openAIAccount.id, principalId, 'cognitiveservicesopenaiuser')
+  name: guid(openAIAccount.id, principalId, 'cognitiveservicesuser')
   properties: {
-    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '5e0bd9bd-7b93-4f28-af87-19fc36ad61bd') // Cognitive Services OpenAI User role
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'a97b65f3-24c7-4388-baec-2e87135dc908') // Cognitive Services User role
     principalId: principalId
     principalType: 'ServicePrincipal'
   }

@@ -73,6 +73,19 @@ resource acrPullRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-
   }
 }
 
+// Assign AcrPull to the App Service *system-assigned* managed identity as well.
+// This avoids outages if App Service falls back to the system identity for ACR pulls
+// (e.g., when acrUserManagedIdentityID is not set/applied as expected).
+resource acrPullRoleAssignmentSystemAssigned 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(subscription().subscriptionId, resourceGroup().name, containerRegistryName, appServiceName, 'acrpull-systemassigned')
+  scope: containerRegistry
+  properties: {
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '7f951dda-4ed3-4680-a7ca-43fe172d538d')
+    principalId: appService.identity.principalId
+    principalType: 'ServicePrincipal'
+  }
+}
+
 // App Service
 resource appService 'Microsoft.Web/sites@2023-12-01' = {
   name: appServiceName
@@ -80,7 +93,7 @@ resource appService 'Microsoft.Web/sites@2023-12-01' = {
   tags: tags
   kind: 'app,linux,container'
   identity: {
-    type: 'UserAssigned'
+    type: 'SystemAssigned, UserAssigned'
     userAssignedIdentities: {
       '${managedIdentity.id}': {}
     }
@@ -91,6 +104,7 @@ resource appService 'Microsoft.Web/sites@2023-12-01' = {
     siteConfig: {
       linuxFxVersion: 'DOCKER|${containerRegistryUrl}/${dockerImageName}'
       acrUseManagedIdentityCreds: true
+      // App Service requires the managed identity *Client ID* for ACR authentication
       acrUserManagedIdentityID: managedIdentity.properties.clientId
       alwaysOn: false
       ftpsState: 'Disabled'
@@ -194,3 +208,4 @@ output appServicePlanName string = appServicePlan.name
 output managedIdentityId string = managedIdentity.id
 output managedIdentityClientId string = managedIdentity.properties.clientId
 output managedIdentityPrincipalId string = managedIdentity.properties.principalId
+output systemAssignedPrincipalId string = appService.identity.principalId
