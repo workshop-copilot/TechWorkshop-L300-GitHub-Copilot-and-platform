@@ -11,11 +11,18 @@ public class AzureOpenAIChatService : IChatService
 {
     private readonly HttpClient _httpClient;
     private readonly AzureOpenAIOptions _options;
+    private readonly DefaultAzureCredential? _credential;
 
     public AzureOpenAIChatService(HttpClient httpClient, IOptions<AzureOpenAIOptions> options)
     {
         _httpClient = httpClient;
         _options = options.Value;
+        
+        // Initialize credential once if ApiKey is not configured
+        if (string.IsNullOrWhiteSpace(_options.ApiKey))
+        {
+            _credential = new DefaultAzureCredential();
+        }
     }
 
     public async Task<string> SendMessageAsync(string userMessage, CancellationToken cancellationToken = default)
@@ -37,13 +44,16 @@ public class AzureOpenAIChatService : IChatService
         {
             request.Headers.Add("api-key", _options.ApiKey);
         }
-        else
+        else if (_credential != null)
         {
-            var credential = new DefaultAzureCredential();
-            var token = await credential.GetTokenAsync(
+            var token = await _credential.GetTokenAsync(
                 new TokenRequestContext(["https://cognitiveservices.azure.com/.default"]),
                 cancellationToken);
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token.Token);
+        }
+        else
+        {
+            throw new InvalidOperationException("Neither API key nor Azure credential is configured.");
         }
 
         var payload = new
