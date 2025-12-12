@@ -57,7 +57,7 @@ public class ChatController : Controller
         catch (Exception ex)
         {
             _logger.LogError(ex, "Chat request failed");
-            return StatusCode(StatusCodes.Status502BadGateway, new ChatResponse { Error = "Chat request failed. Check configuration and try again." });
+            return StatusCode(StatusCodes.Status502BadGateway, new ChatResponse { Error = "Unable to reach the chat service. Please try again later." });
         }
     }
 
