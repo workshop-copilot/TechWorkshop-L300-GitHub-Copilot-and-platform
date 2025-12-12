@@ -6,11 +6,10 @@ on:
       - main
     paths:
       - 'src/**'
-  pull_request:
-    branches: [ main ]
   workflow_dispatch:
 
 env:
+  SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID }}
   REGISTRY_NAME: ${{ vars.AZURE_CONTAINER_REGISTRY_NAME }}
   APP_SERVICE_NAME: ${{ vars.AZURE_APP_SERVICE_NAME }}
   RESOURCE_GROUP: ${{ vars.AZURE_RESOURCE_GROUP }}
@@ -29,14 +28,25 @@ jobs:
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
 
+    - name: Set Azure subscription
+      run: |
+        az account set --subscription "${{ env.SUBSCRIPTION_ID }}"
+
+    - name: Resolve resource group (if not set)
+      run: |
+        if [ -z "${{ env.RESOURCE_GROUP }}" ]; then
+          rg=$(az webapp show --name "${{ env.APP_SERVICE_NAME }}" --query resourceGroup --output tsv --subscription "${{ env.SUBSCRIPTION_ID }}")
+          echo "RESOURCE_GROUP=$rg" >> "$GITHUB_ENV"
+        fi
+
     - name: Log in to Azure Container Registry
       run: |
-        az acr login --name ${{ env.REGISTRY_NAME }}
+        az acr login --name "${{ env.REGISTRY_NAME }}" --subscription "${{ env.SUBSCRIPTION_ID }}"
 
     - name: Resolve registry login server
       run: |
-        $registryUrl=$(az acr show --name "${{ env.REGISTRY_NAME }}" --query loginServer --output tsv)
-        echo "REGISTRY_URL=$registryUrl" >> $GITHUB_ENV
+        registryUrl=$(az acr show --name "${{ env.REGISTRY_NAME }}" --query loginServer --output tsv --subscription "${{ env.SUBSCRIPTION_ID }}")
+        echo "REGISTRY_URL=$registryUrl" >> "$GITHUB_ENV"
 
     - name: Build and push Docker image
       run: |

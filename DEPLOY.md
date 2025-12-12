@@ -26,11 +26,14 @@ Copy the JSON output and add it as a secret named `AZURE_CREDENTIALS`.
 
 Add the following repository variables in GitHub Settings > Secrets and variables > Actions > Variables:
 
+- **AZURE_SUBSCRIPTION_ID**: The subscription ID that contains your resources
 - **AZURE_CONTAINER_REGISTRY_NAME**: Your Azure Container Registry name (e.g., `crzavastorefrontappdev123`)
 - **AZURE_APP_SERVICE_NAME**: Your App Service name (e.g., `app-zavastorefrontapp-dev-123`)
-- **AZURE_RESOURCE_GROUP**: Your Azure resource group name
+- **AZURE_RESOURCE_GROUP**: (Optional) Your Azure resource group name
 
 > Note: You do NOT need to set `AZURE_CONTAINER_REGISTRY_URL`. The workflow resolves the ACR login server from `AZURE_CONTAINER_REGISTRY_NAME` using Azure CLI.
+
+> Note: If you omit `AZURE_RESOURCE_GROUP`, the workflow will resolve it from `AZURE_APP_SERVICE_NAME`.
 
 ## Workflow Behavior
 
