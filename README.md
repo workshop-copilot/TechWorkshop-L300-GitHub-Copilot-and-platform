@@ -2,6 +2,13 @@
 
 This lab guides you through a series of practical exercises focused on modernising Zava's business applications and databases by migrating everything to Azure, leveraging GitHub Enterprise, Copilot, and Azure services. Each exercise is designed to deliver hands-on experience in governance, automation, security, AI integration, and observability, ensuring Zava’s transition to Azure is robust, secure, and future-ready.
 
+## Prerequisites
+
+To build and run this project, you will need:
+
+- **.NET 8.0 SDK or later** (LTS version)  
+  Download from: https://dotnet.microsoft.com/download/dotnet/8.0
+
 ## Contributing
 
 This project welcomes contributions and suggestions.  Most contributions require you to agree to a

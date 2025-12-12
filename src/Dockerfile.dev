@@ -1,7 +1,7 @@
 # Development Dockerfile for ZavaStorefront
 # Optimized for development with hot reload and debugging support
 
-FROM mcr.microsoft.com/dotnet/sdk:6.0 AS development
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS development
 WORKDIR /src
 
 # Install additional tools for development

@@ -2,6 +2,18 @@
 
 本指南提供了完整的 Docker 开发环境，包括本地开发和生产部署两种配置。
 
+## 📋 前提条件
+
+在开始之前，请确保您的系统满足以下要求：
+
+- **Docker Desktop** 或 **Docker Engine** (20.10 或更高版本)
+- **.NET 8.0 SDK** (LTS 版本) - 用于本地开发
+  - 下载地址: https://dotnet.microsoft.com/download/dotnet/8.0
+- **Docker Compose** (v2.0 或更高版本)
+- **PowerShell** (用于运行构建脚本)
+
+**注意**: Docker 镜像基于官方 Microsoft .NET 8.0 镜像，确保与 LTS 版本兼容。
+
 ## 🐳 Docker 文件结构
 
 ```
@@ -146,7 +158,7 @@ azd deploy
 ## 🔒 安全考虑
 
 ### 镜像安全
-- 使用官方 Microsoft .NET 基础镜像
+- 使用官方 Microsoft .NET 8.0 基础镜像
 - 非 root 用户运行应用
 - 最小权限原则
 - 定期更新基础镜像
