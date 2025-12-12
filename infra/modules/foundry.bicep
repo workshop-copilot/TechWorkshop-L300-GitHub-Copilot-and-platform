@@ -45,6 +45,8 @@ resource openAIAccount 'Microsoft.CognitiveServices/accounts@2024-10-01' = {
   }
   properties: {
     customSubDomainName: openAIAccountName
+    // Enforce identity-only access (disables API key auth)
+    disableLocalAuth: true
     networkAcls: {
       defaultAction: 'Allow'
       virtualNetworkRules: []
