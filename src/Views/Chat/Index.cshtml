@@ -1,0 +1,87 @@
+@model ZavaStorefront.Models.ChatPageViewModel
+@{
+    ViewData["Title"] = "Chat";
+}
+
+<div class="row">
+    <div class="col-lg-8">
+        <h2 class="mb-3">Chat</h2>
+
+        <div class="mb-3">
+            <label for="chatHistory" class="form-label">Conversation</label>
+            <textarea id="chatHistory" class="form-control" rows="14" readonly>@Model.HistoryText</textarea>
+            <div id="chatStatus" class="form-text"></div>
+        </div>
+
+        <div class="mb-3">
+            <label for="chatMessage" class="form-label">Your message</label>
+            <input id="chatMessage" class="form-control" type="text" maxlength="2000" placeholder="Type a message..." />
+        </div>
+
+        <button id="chatSend" class="btn btn-primary" type="button">Send</button>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+(function () {
+    const historyEl = document.getElementById('chatHistory');
+    const messageEl = document.getElementById('chatMessage');
+    const sendEl = document.getElementById('chatSend');
+    const statusEl = document.getElementById('chatStatus');
+
+    function appendToHistory(lines) {
+        const prefix = historyEl.value && !historyEl.value.endsWith('\n') ? '\n' : '';
+        historyEl.value = historyEl.value + prefix + lines;
+        historyEl.scrollTop = historyEl.scrollHeight;
+    }
+
+    function setLoading(isLoading) {
+        sendEl.disabled = isLoading;
+        messageEl.disabled = isLoading;
+        statusEl.textContent = isLoading ? 'Sending...' : '';
+    }
+
+    async function send() {
+        const msg = (messageEl.value || '').trim();
+        if (!msg) return;
+
+        setLoading(true);
+        try {
+            appendToHistory('You: ' + msg);
+
+            const res = await fetch('/Chat/SendMessage', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: msg })
+            });
+
+            const data = await res.json().catch(() => ({}));
+
+            if (!res.ok) {
+                const err = data && data.error ? data.error : 'Request failed.';
+                appendToHistory('AI: ' + err);
+                return;
+            }
+
+            const reply = data && data.reply ? data.reply : '';
+            appendToHistory('AI: ' + reply);
+            appendToHistory('');
+            messageEl.value = '';
+        } catch (e) {
+            appendToHistory('AI: Request failed.');
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    sendEl.addEventListener('click', send);
+    messageEl.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            send();
+        }
+    });
+})();
+</script>
+}
