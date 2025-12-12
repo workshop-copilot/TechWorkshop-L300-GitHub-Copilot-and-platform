@@ -1,0 +1,30 @@
+# Azure Developer CLI (azd) configuration file
+name: zavastorefrontapp
+metadata:
+  template: zavastorefrontapp@0.0.1-beta
+
+# Infrastructure configuration
+infra:
+  provider: bicep
+  path: ./infra
+
+# Services configuration  
+services:
+  web:
+    project: ./src
+    language: dotnet
+    host: appservice
+
+# Hooks for lifecycle events
+hooks:
+  postprovision:
+    shell: pwsh
+    run: |
+      Write-Host "Infrastructure provisioning completed successfully!"
+      Write-Host "App Service URL: $(azd env get-values --output json | ConvertFrom-Json).AZURE_APP_SERVICE_URL"
+      Write-Host "Container Registry: $(azd env get-values --output json | ConvertFrom-Json).AZURE_CONTAINER_REGISTRY_NAME"
+
+# Monitoring and observability
+monitor:
+  properties:
+    applicationInsightsName: "ai-zavastorefrontapp-dev"
